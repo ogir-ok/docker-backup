@@ -55,7 +55,7 @@ class Backup(object):
                "/bin/bash", "-c",
                self.backup_command()
                ]
-       subprocess.call(cmd)
+        subprocess.call(cmd)
 
     def clean_backup(self):
         backup_dir = self.backup_dir()
