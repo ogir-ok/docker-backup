@@ -9,8 +9,8 @@ from datetime import datetime
 from docker import Client
 
 DOCKER_URL = 'unix://var/run/docker.sock'
-BACKUP_DIR = '/mnt/backup-server/'
-BACKUP_IMAGE = 'docker-backup'
+BACKUP_DIR = '/backup/'
+BACKUP_IMAGE = 'ogirok/docker-backup'
 STORE_DB_BACKUPS = 3
 
 cli = Client(base_url=DOCKER_URL)
@@ -47,6 +47,7 @@ class Backup(object):
 
     def do_backup(self):
         cmd = ['docker', 'run', '--rm', '-it',
+               '--network', self.container['HostConfig']['NetworkMode'],
                '--link', '{}:source'.format(self.container['Id']),
                '--volumes-from', self.container['Id'],
                '-v', '{}:/backup/'.format(self.backup_dir()),
@@ -54,7 +55,7 @@ class Backup(object):
                "/bin/bash", "-c",
                self.backup_command()
                ]
-        os.system(' '.join(cmd))
+        subprocess.call(cmd)
 
     def clean_backup(self):
         backup_dir = self.backup_dir()
