@@ -1,0 +1,10 @@
+docker-backup:
+  image: ogirok/docker-backup
+  container_name: docker-backup
+  restart: unless-stopped
+  volumes:
+    - /tmp/backup:/backup
+    - /var/run/docker.sock:/var/run/docker.sock
+    - ./devctontab:/crontab
+
+
