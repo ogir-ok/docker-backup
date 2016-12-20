@@ -59,7 +59,11 @@ class Backup(object):
     def clean_backup(self):
         backup_dir = self.backup_dir()
         for remove in sorted(os.listdir(backup_dir)[:-STORE_DB_BACKUPS]):
-            shutil.rmtree(os.path.join(backup_dir, remove))
+            remove_path = os.path.join(backup_dir, remove)
+            if os.path.isdir(remove_path):
+                shutil.rmtree(remove_path)
+            else:
+                os.unlink(remove_path)
 
     def backup(self):
         start = time.time()
