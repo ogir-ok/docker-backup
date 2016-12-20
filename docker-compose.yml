@@ -4,7 +4,7 @@ docker-backup:
   restart: unless-stopped
   volumes:
     - ./backup.py:/backup.py
-    - /tmp/backup:/backup
+    - /mnt/backup-server:/backup
     - /var/run/docker.sock:/var/run/docker.sock
     - ./devctontab:/crontab
 
