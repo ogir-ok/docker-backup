@@ -6,15 +6,16 @@ from datetime import datetime
 import shutil
 import yaml
 
+BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 client = docker.from_env()
 settings = {}
 try:
-    with open('settings.yml') as f:
+    with open(os.path.join(BASE_DIR, 'settings.yml')) as f:
         settings = yaml.load(f)
 except Exception as e:
     print(e)
 
-TARGET_DIR = settings.get('TARGET_DIR', os.path.join(os.path.dirname(os.path.realpath(__file__)), 'backup'))
+TARGET_DIR = settings.get('TARGET_DIR', os.path.join(BASE_DIR, 'backup'))
 STORE_DB_BACKUPS = settings.get('STORE_DB_BACKUPS', 3)
 DETACH_RSYNC = settings.get('DETACH_RSYNC', True)
 
