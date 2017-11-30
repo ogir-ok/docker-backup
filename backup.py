@@ -16,6 +16,7 @@ except Exception as e:
 
 TARGET_DIR = settings.get('TARGET_DIR', os.path.join(os.path.dirname(os.path.realpath(__file__)), 'backup'))
 STORE_DB_BACKUPS = settings.get('STORE_DB_BACKUPS', 3)
+DETACH_RSYNC = settings.get('DETACH_RSYNC', True)
 
 
 class Backup:
@@ -89,7 +90,9 @@ class MountsBackup(Backup):
             target = target[:-1]
         if folder.startswith('/'):
             folder += '/'
-        client.containers.run('ogirok/docker-backup', 'rsync -avzP {} {}'.format(folder, target), volumes_from=self.container.name, volumes={target: {'bind': target, 'mode': 'rw'}})
+        client.containers.run('ogirok/docker-backup', 'rsync -avzP {} {}'.format(folder, target), volumes_from=self.container.name, volumes={target: {'bind': target, 'mode': 'rw'}}, remove=True, detach=DETACH_RSYNC)
+        if DETACH_RSYNC:
+            print('detached', end='...', flush=True)
 
 
 class DoNotBackup(Backup):
@@ -123,7 +126,7 @@ class DBBackup(Backup):
 
         client.containers.run(self.container.image_name, self.cmd, links={self.container.name: self.container.name},
                               volumes={self.target_dir: {'bind': self.target_dir, 'mode': 'rw'}},
-                              environment=self.get_environment(), network=self._network)
+                              environment=self.get_environment(), network=self._network, remove=True)
 
 
 class PostgresBackup(DBBackup):
