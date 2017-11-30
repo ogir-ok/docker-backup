@@ -1,0 +1,2 @@
+TARGET_DIR: /mnt/backup-server
+STORE_DB_BACKUPS: 5

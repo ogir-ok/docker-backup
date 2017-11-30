@@ -81,7 +81,7 @@ class MountsBackup(Backup):
 
     def backup_mount(self, folder):
         target = os.path.join(self.target_dir, folder[1:])
-        client.containers.run('ogirok/docker-backup', 'rsync -avzP {} {}'.format(folder, target), volumes_from=self.container.name, volumes={target: {'bind': target, 'mode': 'rw'}})
+        client.containers.run('ogirok/docker-backup', 'rsync -avzP --delete {} {}'.format(folder, target), volumes_from=self.container.name, volumes={target: {'bind': target, 'mode': 'rw'}})
 
 
 class DoNotBackup(Backup):

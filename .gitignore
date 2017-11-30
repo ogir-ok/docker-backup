@@ -1,3 +1,5 @@
 .idea
 backup
 *.pyc
+
+settings.yml
