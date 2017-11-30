@@ -87,8 +87,8 @@ class MountsBackup(Backup):
         target = os.path.join(self.target_dir, folder[1:])
         if target.endswith('/'):
             target = target[:-1]
-        if folder.endswith('/'):
-            folder = folder[:-1]
+        if folder.startswith('/'):
+            folder += '/'
         client.containers.run('ogirok/docker-backup', 'rsync -avzP {} {}'.format(folder, target), volumes_from=self.container.name, volumes={target: {'bind': target, 'mode': 'rw'}})
 
 
