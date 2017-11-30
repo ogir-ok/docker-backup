@@ -1,11 +1,16 @@
-docker-backup:
-  image: ogirok/docker-backup
-  container_name: docker-backup
-  restart: unless-stopped
-  volumes:
-    - ./backup.py:/backup.py
-    - /mnt/backup-server:/backup
-    - /var/run/docker.sock:/var/run/docker.sock
-    - ./devctontab:/crontab
+version: "3"
+services:
+  docker-backup:
+    build: .
+    image: ogirok/docker-backup
+    container_name: docker-backup
+    #restart: unless-stopped
+    command: /src/backup.py
+    volumes:
+      - .:/src/
+      - /mnt/backup-server:/mnt/backup-server
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/lib/docker:/var/lib/docker
+      - ./devctontab:/crontab
 
 
