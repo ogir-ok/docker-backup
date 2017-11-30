@@ -62,7 +62,11 @@ class Backup:
         except Exception as e:
             print("Failed in {0:.2f}s".format(time.time() - start))
             print(e)
-            os.unlink(self.target_file)
+            if os.path.exists(self.target_file):
+                if os.path.isdir(self.target_file):
+                    shutil.rmtree(self.target_file)
+                else:
+                    os.unlink(self.target_file)
             return
 
         print("Done in {0:.2f}s".format(time.time() - start))
