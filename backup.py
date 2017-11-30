@@ -166,6 +166,7 @@ class MongoBackup(DBBackup):
 BACKUP_CLASSES = (
     (r'.*postgre.*', PostgresBackup),
     (r'.*mysql.*', MysqlBackup),
+    (r'.*mariadb.*', MysqlBackup),
     (r'.*mongo.*', MongoBackup),
     (r'.*redis.*', DoNotBackup),
     (r'.*docker-backup.*', DoNotBackup),
