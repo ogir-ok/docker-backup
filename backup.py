@@ -4,10 +4,20 @@ import os
 import time
 from datetime import datetime
 import shutil
+import yaml
 
 client = docker.from_env()
-TARGET_DIR = '/Users/ogir_ok/workspace/docker-backup/backup'
-STORE_DB_BACKUPS = 3
+settings = {}
+try:
+    with open('settings.yml') as f:
+        settings = yaml.load(f.read)
+except Exception as e:
+    print(e)
+print(settings)
+
+TARGET_DIR = settings.get('TARGET_DIR', os.path.join(os.path.dirname(os.path.realpath(__file__)), 'backup'))
+print(TARGET_DIR)
+STORE_DB_BACKUPS = settings.get('STORE_DB_BACKUPS', 3)
 
 
 class Backup:
