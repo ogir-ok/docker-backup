@@ -39,6 +39,7 @@ def session_scope():
 def get_fs_size(path):
     size = 0
     if os.path.isdir(path):
+        return -1
         for (path, dirs, files) in os.walk(path):
             for file in files:
                 filename = os.path.join(path, file)
@@ -79,7 +80,6 @@ class BackupEntry:
         self.dir, self.name = os.path.split(self.path)
         self.date = self.get_date()
         self.container = container
-        self.size = get_fs_size(self.path)
 
         with session_scope() as session:
             self.instance = session.query(Backup).filter_by(date=self.date, container=self.container).first()
@@ -93,6 +93,7 @@ class BackupEntry:
             return datetime.fromtimestamp(os.path.getctime(self.path))
 
     def save(self):
+        self.size = get_fs_size(self.path)
         if not self.instance:
             self.instance = Backup(host=HOST, container=self.container, size=self.size, date=self.date)
         with session_scope() as session:
