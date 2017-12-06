@@ -143,7 +143,6 @@ def main():
             gather_backups()
         except Exception as e:
             print('Error:', e)
-            raise
 
         time.sleep(3600 * 12)
 
