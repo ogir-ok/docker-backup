@@ -106,17 +106,20 @@ class BackupEntry:
 
 
 def gather_backups(backup_dir=BACKUP_DIR):
+    print('Starting gathering backups')
     backup_collections = []
     for container in os.listdir(backup_dir):
         backups_path = os.path.join(backup_dir, container)
         if os.path.isdir(backups_path):
             collection = BackupCollection(container)
             collection.parse()
+            print(backup_collection.backups)
             backup_collections.append(collection)
 
     host_ids = []
     for backup_collection in backup_collections:
         for backup in backup_collection.backups:
+            print(backup)
             host_ids.append(backup.save())
 
     with session_scope() as session:
