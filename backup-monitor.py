@@ -39,7 +39,6 @@ def session_scope():
 def get_fs_size(path):
     size = 0
     if os.path.isdir(path):
-        return 0
         for (path, dirs, files) in os.walk(path):
             for file in files:
                 filename = os.path.join(path, file)
