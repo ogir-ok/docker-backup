@@ -1,3 +1,4 @@
+import asyncio
 import os
 import time
 from contextlib import contextmanager
@@ -9,9 +10,9 @@ from sqlalchemy import create_engine, Column, Integer, String, DateTime
 from sqlalchemy.sql.elements import not_
 
 Base = declarative_base()
-BACKUP_DIR = 'backup'
+BACKUP_DIR = os.getenv('BACKUP_SOURCE', '/backup')
 
-HOST = os.getenv('HOST', 'localhost')
+HOST = os.getenv('HOST', 'local')
 MYSQL_HOST = os.getenv('MYSQL_HOST', 'mysql')
 MYSQL_USER = os.getenv('MYSQL_USER', 'root')
 MYSQL_PASSWORD = os.getenv('MYSQL_PASSWORD', 'test37')
@@ -79,6 +80,7 @@ class BackupEntry:
         self.dir, self.name = os.path.split(self.path)
         self.date = self.get_date()
         self.container = container
+        self.size = -1
 
         with session_scope() as session:
             self.instance = session.query(Backup).filter_by(date=self.date, container=self.container).first()
@@ -89,19 +91,20 @@ class BackupEntry:
         try:
             return parser.parse(name)
         except Exception:
-            return datetime.fromtimestamp(os.path.getctime(self.path))
+            return datetime.fromtimestamp(os.path.getctime(self.path)).date()
 
-    def save(self):
+    async def save(self):
         self.size = get_fs_size(self.path)
         if not self.instance:
             self.instance = Backup(host=HOST, container=self.container, size=self.size, date=self.date)
         with session_scope() as session:
             session.add(self.instance)
             session.commit()
+            print(self)
             return self.instance.id
 
     def __repr__(self):
-        return '<BU: {} {} {}b>'.format(self.container, self.date, self.size)
+        return '<BU: {} {}>'.format(self.container, self.date)
 
 
 def gather_backups(backup_dir=BACKUP_DIR):
@@ -112,30 +115,22 @@ def gather_backups(backup_dir=BACKUP_DIR):
         if os.path.isdir(backups_path):
             collection = BackupCollection(container)
             collection.parse()
-            print(backup_collection.backups)
             backup_collections.append(collection)
 
-    host_ids = []
-    for backup_collection in backup_collections:
-        for backup in backup_collection.backups:
-            print(backup)
-            host_ids.append(backup.save())
+    request = []
+    for collection in backup_collections:
+        for backup in collection.backups:
+            request.append(backup.save())
+
+    loop = asyncio.get_event_loop()
+    host_ids = loop.run_until_complete(asyncio.gather(*request))
+    loop.close()
 
     with session_scope() as session:
         outdated = session.query(Backup).filter_by(host=HOST).filter(not_(Backup.id.in_(host_ids)))
         print('Outdated', outdated.count())
         outdated.delete(synchronize_session='fetch')
         session.commit()
-
-
-def db_command(command, db=True):
-    cmd_template = 'mysql -h{HOST}  -u{USER} -p{PASSWORD}'
-    if db:
-        cmd_template += ' {NAME}'
-    cmd_template += ' -e "{command}"'
-
-    return local(cmd_template.format(command=command, **settings.DATABASES['default']))
-
 
 def main():
 
@@ -145,7 +140,7 @@ def main():
         try:
             gather_backups()
         except Exception as e:
-            print('Error:', e)
+            raise
 
         time.sleep(3600 * 12)
 

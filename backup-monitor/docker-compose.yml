@@ -1,0 +1,15 @@
+mysql:
+  image: mysql:5.6
+  environment:
+    MYSQL_ROOT_PASSWORD: test37
+backup-monitor:
+  image: python:3.6
+  command: /bin/bash -c "pip install -r /src/requirements.txt && python3 /src/bm.py"
+  links:
+    - mysql
+  volumes:
+    - ../backup:/backup/:ro
+    - .:/src/
+
+
+
