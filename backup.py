@@ -87,11 +87,12 @@ class MountsBackup(Backup):
 
     def backup_mount(self, folder):
         target = os.path.join(self.target_dir, folder[1:])
+        container_name = 'rb_' + self.container.name + re.sub(r'[^a-zA-Z]+', '', folder)
         if target.endswith('/'):
             target = target[:-1]
         if folder.startswith('/'):
             folder += '/'
-        client.containers.run('ogirok/docker-backup', 'rsync -avzP {} {}'.format(folder, target), volumes_from=self.container.name, volumes={target: {'bind': target, 'mode': 'rw'}}, remove=True, detach=DETACH_RSYNC)
+        client.containers.run('ogirok/docker-backup', 'rsync -avzP {} {}'.format(folder, target), volumes_from=self.container.name, volumes={target: {'bind': target, 'mode': 'rw'}}, remove=True, detach=DETACH_RSYNC, name=container_name)
         if DETACH_RSYNC:
             print('detached', end='...', flush=True)
 
